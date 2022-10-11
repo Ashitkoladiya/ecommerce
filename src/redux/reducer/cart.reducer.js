@@ -11,11 +11,24 @@ export const cartReducer = (state = initialState, action) => {
 
     switch (action.type) {
         case ActionType.ADD_CART:
+            const Cdata = state.cart.find((s) => s.id === action.payload.id)
+            if (Cdata) {
+                Cdata.qty++;
+            } else {
+                state.cart.push(action.payload)
+            }
             return {
                 ...state,
                 isLoading: false,
-                cart: state.cart.concat(action.payload),
+                // cart: state.cart.concat(action.payload),
                 errors: ''
+            }
+        case ActionType.DELETE_CART:
+            return {
+                ...state,
+                isLoading: false,
+                cart: state.cart.filter((d, f) => d.id !== action.payload),
+                error: ""
             }
         case ActionType.INCREMENTQNT:
             return {

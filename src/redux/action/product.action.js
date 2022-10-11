@@ -9,10 +9,10 @@ import { deleteObject, getDownloadURL, ref, uploadBytes } from "firebase/storage
 export const getProduct = (data) => async (dispatch) => {
   console.log(data);
     try {
-      let data=[]
       // dispatch({type: ActionType.GET_DOCTOR,payload:data});
       const querySnapshot = await getDocs(collection(db, "Product"));
-  
+      
+      let data=[]
       
       console.log(data);
       querySnapshot.forEach((doc) => {

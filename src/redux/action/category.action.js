@@ -32,7 +32,7 @@ export const getCategory = (data) => async (dispatch) => {
   export const addCategory = (data) => async (dispatch) => {
     console.log(data);
     try {
-      const imgref = Math.floor(Math.random() * 1000000).toString();
+      const imgref = Math.floor(Math.random() * 10000000).toString();
       const docref = ref(storage, 'category/' + imgref);
   
   

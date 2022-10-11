@@ -1,30 +1,51 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { decrement, increment } from '../redux/action/cart.action';
+import { useHistory } from 'react-router-dom';
+import { decrement, deletecart, increment } from '../redux/action/cart.action';
+import { getProduct } from '../redux/action/product.action';
+import CloseIcon from '@mui/icons-material/Close';
+import * as yup from 'yup';
+import { Form, Formik, useFormik } from 'formik';
+import { postorder } from '../redux/action/orderplaced.action';
+import { Button, DialogActions, DialogContent, TextField } from '@mui/material';
+// import { postorder } from '../redux/action/orderplaced.action';
 
 function Cart(props) {
     const cart = useSelector(state => state.cart);
+    const [cartData, setCartData] = useState([])
+    const [placeorder, setPlaceorder] = useState(false)
+    const history = useHistory()
+    const product = useSelector(state => state.product);
+    const productItem = product.product;
+    const cartItem = cart.cart;
     console.log(cart);
-    const filterCart = []
-    const cartData = [];
+    // const cartData = [];
     let Total;
 
     const dispatch = useDispatch();
-    const product = useSelector(state => state.product);
     console.log(product);
-    cart.cart.map((c => product.product.map((p) => {
-        if (c.id === p.id) {
-            const data = {
-                ...p,
-                qty: c.qty
-            }
-            filterCart.push(data)
-        }
-    })))
+    const cartDataFun = () => {
+        const Procart = [];
+        productItem.map((j) => {
+            cartItem.map((s) => {
+                if (j.id === s.id) {
+                    console.log(j.id);
+                    console.log(s.id);
+                    const quacount = {
+                        ...j,
+                        qty: s.qty
+                    }
+                    console.log(s.qty);
+                    Procart.push(quacount)
+                }
+            })
+        })
+        setCartData(Procart)
+    }
     let TotalAmount = 0;
-    filterCart.map((c) => {
+    cartData.map((c) => {
         Total = parseInt(c.price) * c.qty;
-        console.log("cdcdcdcd",c.qty);
+        console.log("cdcdcdcd", c.qty);
         TotalAmount = TotalAmount + Total;
     })
 
@@ -33,7 +54,10 @@ function Cart(props) {
 
     console.log(Total);
 
-    console.log(filterCart);
+    console.log(cartData);
+    const handleDelete = (id) => {
+        dispatch(deletecart(id))
+    }
 
     const handleincriment = (id) => {
         dispatch(increment(id))
@@ -42,6 +66,44 @@ function Cart(props) {
         console.log(id);
         dispatch(decrement(id))
     }
+    const orderplace = () => {
+        setPlaceorder(true)
+    }
+
+    useEffect(() => {
+        dispatch(getProduct())
+        cartDataFun();
+    }, [cartItem])
+
+    let schema = yup.object().shape({
+        user_name: yup.string().required("Please enter name"),
+        user_email: yup.string().required("Please enter email"),
+        user_address: yup.string().required("please enter address").max(100, 'Must be exactly 100 digits'),
+        user_phone: yup.number().required("please enter Phone number"),
+
+    });
+
+    const formik = useFormik({
+        initialValues: {
+            user_name: '',
+            user_email: '',
+            user_address: "",
+            user_phone: "",
+        },
+        validationSchema: schema,
+        onSubmit: (values, { resetForm }) => {
+            const submitorder = {
+                userDetails: values,
+                cartDetails: cartData
+            };
+            history.push('/')
+            dispatch(postorder(submitorder))
+            resetForm();
+
+        }
+
+
+    });
 
     return (
         <>
@@ -65,104 +127,142 @@ function Cart(props) {
                 <section className="cart_area">
                     <div className="container">
                         <div className="cart_inner">
-                            <div className="table-responsive">
-                                <table className="table">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col">Product</th>
-                                            <th scope="col">Price</th>
-                                            <th scope="col">Quantity</th>
-                                            <th scope="col">Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {/* <tr>
-                                            <td>
-                                                <div className="media">
-                                                    <div className="d-flex">
-                                                        <img src="img/cart.jpg" alt />
-                                                    </div>
-                                                    <div className="media-body">
-                                                        <p>Minimalistic shop for multipurpose use</p>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <h5>$360.00</h5>
-                                            </td>
-                                            <td>
-                                                <div className="product_count">
-                                                    <input type="text" name="qty" id="sst" maxLength={12} defaultValue={1} title="Quantity:" className="input-text qty" />
-                                                    <button onclick="var result = document.getElementById('sst'); var sst = result.value; if( !isNaN( sst )) result.value++;return false;" className="increase items-count" type="button"><i className="lnr lnr-chevron-up" /></button>
-                                                    <button onclick="var result = document.getElementById('sst'); var sst = result.value; if( !isNaN( sst ) && sst > 0 ) result.value--;return false;" className="reduced items-count" type="button"><i className="lnr lnr-chevron-down" /></button>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <h5>$720.00</h5>
-                                            </td>
-                                        </tr> */}
-                                        {/* <tr>
-                                            <td>
-                                                <div className="media">
-                                                    <div className="d-flex">
-                                                        <img src="img/cart.jpg" alt />
-                                                    </div>
-                                                    <div className="media-body">
-                                                        <p>Minimalistic shop for multipurpose use</p>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <h5>$360.00</h5>
-                                            </td>
-                                            <td>
-                                                <div className="product_count">
-                                                    <input type="text" name="qty" id="sst" maxLength={12} defaultValue={1} title="Quantity:" className="input-text qty" />
-                                                    <button onclick="var result = document.getElementById('sst'); var sst = result.value; if( !isNaN( sst )) result.value++;return false;" className="increase items-count" type="button"><i className="lnr lnr-chevron-up" /></button>
-                                                    <button onclick="var result = document.getElementById('sst'); var sst = result.value; if( !isNaN( sst ) && sst > 0 ) result.value--;return false;" className="reduced items-count" type="button"><i className="lnr lnr-chevron-down" /></button>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <h5>$720.00</h5>
-                                            </td>
-                                        </tr> */}
-                                        {
-                                            filterCart.map((f) => {
-                                                console.log(f);
-                                                return (
-                                                    <>
-                                                        <tr>
-                                                            <td>
-                                                                <div className="media">
-                                                                    <div className="d-flex">
-                                                                        <img src={f.url} className='card-img' alt />
-                                                                    </div>
-                                                                    <div className="media-body">
-                                                                        <p>{f.productname}</p>
-                                                                    </div>
-                                                                </div>
-                                                            </td>
-                                                            <td>
-                                                                <h5>${f.price}</h5>
-                                                            </td>
-                                                            <td>
-                                                                <div className="product_count">
+                            {placeorder ?
 
-                                                                    <button className="increase items-count" type="button" onClick={() =>handleincriment(f.id)}>+</button><br/>
-                                                                    <p>{f.qty}</p>
-                                                                    <button className="reduced items-count" type="button" onClick={() =>handledecrement(f.id)} disabled={f.qty === 1 && true}>-</button>
+                                <Formik value={formik}>
+                                    <Form key={formik} onSubmit={formik.handleSubmit}>
+                                        <DialogContent>
 
-                                                                </div>
-                                                            </td>
-                                                            <td>
-                                                                <h5>${f.price*f.qty}</h5>
-                                                            </td>
-                                                        </tr>
-                                                    </>
-                                                )
-                                            })
-                                        }
-                                        {/* <tr className="bottom_button">
+                                            <TextField
+
+                                                margin="dense"
+                                                id="user_name"
+                                                name="user_name"
+                                                value={formik.values.user_name}
+                                                label="Name"
+                                                fullWidth
+                                                variant="standard"
+                                                onChange={formik.handleChange}
+
+                                            />
+                                            {
+                                                formik.errors.user_name ? <p>{formik.errors.user_name}</p> : null
+                                            }
+
+                                            <TextField
+
+                                                margin="dense"
+                                                id="user_email"
+                                                name="user_email"
+                                                value={formik.values.user_email}
+                                                label="email"
+                                                fullWidth
+                                                variant="standard"
+                                                onChange={formik.handleChange}
+
+                                            />
+                                            {
+                                                formik.errors.user_email ? <p>{formik.errors.user_email}</p> : null
+                                            }
+
+                                            <TextField
+
+                                                margin="dense"
+                                                id="user_address"
+                                                name="user_address"
+                                                value={formik.values.user_address}
+                                                label="Address"
+                                                fullWidth
+                                                variant="standard"
+                                                onChange={formik.handleChange}
+
+                                            />
+                                            {
+                                                formik.errors.user_address ? <p>{formik.errors.user_address}</p> : null
+                                            }
+
+                                            <TextField
+
+                                                margin="dense"
+                                                id="user_phone"
+                                                name="user_phone"
+                                                value={formik.values.user_phone}
+                                                label="phone Number"
+                                                fullWidth
+                                                variant="standard"
+                                                onChange={formik.handleChange}
+
+                                            />
+                                            {
+                                                formik.errors.user_phone ? <p>{formik.errors.user_phone}</p> : null
+                                            }
+
+
+
+                                        </DialogContent>
+                                        <DialogActions>
+                                            <Button type="submit">Submit</Button>
+                                        </DialogActions>
+                                    </Form>
+                                </Formik>
+
+
+                                :
+                                <div className="table-responsive">
+                                    <table className="table">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Product</th>
+                                                <th scope="col">Price</th>
+                                                <th scope="col">Quantity</th>
+                                                <th scope="col">Total</th>
+                                                <th scope="col">Delete</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+
+
+                                            {
+                                                cartData.map((f) => {
+                                                    console.log(f);
+                                                    return (
+                                                        <>
+                                                            <tr>
+                                                                <td>
+                                                                    <div className="media">
+                                                                        <div className="d-flex">
+                                                                            <img src={f.url} className='card-img' alt />
+                                                                        </div>
+                                                                        <div className="media-body">
+                                                                            <p>{f.productname}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <h5>${f.price}</h5>
+                                                                </td>
+                                                                <td>
+                                                                    <div className="product_count">
+
+                                                                        <button className="increase items-count" type="button" onClick={() => handleincriment(f.id)}>+</button><br />
+                                                                        <p>{f.qty}</p>
+                                                                        <button className="reduced items-count" type="button" onClick={() => handledecrement(f.id)} disabled={f.qty === 1 && true}>-</button>
+
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <h5>${f.price * f.qty}</h5>
+                                                                </td>
+
+                                                                <td className="">
+                                                                    <a href="" onClick={() => handleDelete(f.id)}  ><CloseIcon /></a>
+                                                                </td>
+                                                            </tr>
+                                                        </>
+                                                    )
+                                                })
+                                            }
+                                            {/* <tr className="bottom_button">
                                             <td>
                                                 <a className="gray_btn" href="#">Update Cart</a>
                                             </td>
@@ -178,46 +278,49 @@ function Cart(props) {
                                                 </div>
                                             </td>
                                         </tr> */}
-                                        <tr>
-                                            <td>
-                                            </td>
-                                            <td>
-                                            </td>
-                                            <td>
-                                                <h5>Discount (10%)</h5>
-                                            </td>
-                                            <td>
-                                                <h5>${Discount}</h5>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                            </td>
-                                            <td>
-                                            </td>
-                                            <td>
-                                                <h5>Subtotal</h5>
-                                            </td>
-                                            <td>
-                                                <h5>${FinalAmount}</h5>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                            </td>
-                                            <td>
-                                            </td>
-                                            <td>
-                                                <h5>Delivery charges</h5>
-                                            </td>
-                                            <td>
-                                                <h5 className='free-shipping'>Free</h5>
-                                            </td>
-                                            <p>You will save $ {FinalAmount-Total} on this order</p>
-                                        </tr>
+                                            <tr>
+                                                <td>
+                                                </td>
+                                                <td>
+                                                </td>
+                                                <td>
+                                                    <h5>Discount (10%)</h5>
+                                                </td>
+                                                <td>
+                                                    <h5>${Discount}</h5>
+                                                    <p className='mt-2 mb-0 pb-0'>You will save $ {FinalAmount - Total} on this order</p>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
 
-                                        
-                                        {/* <tr className="shipping_area">
+                                                </td>
+                                                <td>
+                                                </td>
+                                                <td>
+
+                                                    <h5>Subtotal</h5>
+                                                </td>
+                                                <td>
+                                                    <h5>${FinalAmount}</h5>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                </td>
+                                                <td>
+                                                </td>
+                                                <td>
+                                                    <h5>Delivery charges</h5>
+                                                </td>
+                                                <td>
+                                                    <h5 className='free-shipping'>Free</h5>
+                                                </td>
+
+                                            </tr>
+
+
+                                            {/* <tr className="shipping_area">
                                             <td>
                                             </td>
                                             <td>
@@ -249,23 +352,50 @@ function Cart(props) {
                                                 </div>
                                             </td>
                                         </tr> */}
-                                        <tr className="out_button_area">
-                                            <td>
-                                            </td>
-                                            <td>
-                                            </td>
-                                            <td>
-                                            </td>
-                                            <td>
-                                                <div className="checkout_btn_inner d-flex align-items-center">
-                                                    <a className="gray_btn" href="#">Continue Shopping</a>
-                                                    <a className="primary-btn" href="#">Proceed to checkout</a>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                                            <tr className="out_button_area">
+                                                <td>
+                                                </td>
+                                                <td>
+                                                </td>
+                                                <td>
+                                                </td>
+                                                <td>
+                                                    <div className="checkout_btn_inner d-flex align-items-center">
+                                                        <a className="gray_btn" href='/SingleProduct'>Continue Shopping</a>
+
+
+                                                        {placeorder ?
+                                                            <div className='row'>
+                                                                <div>
+                                                                    <div>
+                                                                        <div>
+                                                                            <button className="primary-btn border-0"><a href onClick={orderplace}> Place Order</a></button>
+
+                                                                        </div>
+                                                                    </div>
+
+                                                                </div>
+                                                            </div>
+                                                            :
+                                                            <div className='row'>
+                                                                <div>
+                                                                    <div>
+                                                                        <div>
+                                                                            <button className="primary-btn border-0"><a href onClick={orderplace} > Place Order</a></button>
+
+                                                                        </div>
+                                                                    </div>
+
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+}
                         </div>
                     </div>
                 </section>

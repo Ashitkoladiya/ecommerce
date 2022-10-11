@@ -15,7 +15,7 @@ function Login(props) {
 
     const handleLogin = (values) => {
         // alert(JSON.stringify(values, null, 2));
-        sessionStorage.setItem("user", "1234567")
+        sessionStorage.setItem("user", "1234567")       
 
     }
 
@@ -41,7 +41,7 @@ function Login(props) {
 
 
     }
-    const handlepassword = (values) => {
+    const handlepassword = (values) => {    
         // alert(JSON.stringify(values.email));
         dispatch(forgetPassword(values))
     }
@@ -161,7 +161,7 @@ function Login(props) {
                                                 <h3>
                                                     <h2 className='center'>Login</h2>
                                                 </h3>
-                                                <form className="row login_form" action="contact_process.php" method="post" id="contactForm" noValidate="novalidate">
+                                                <form className="row login_form">
                                                     {
 
                                                         userType === 'Login' ? null
@@ -230,7 +230,7 @@ function Login(props) {
                                                                 :
                                                                 userType === 'Login' ?
                                                                     <div className="text-center">
-                                                                        <button type="submit" className='btn btn-dark ml-6 mt-4'>Login</button>
+                                                                        <button type="submit" className='btn btn-dark ml-6 mt-4' onClick={()=>handleLogin()}>Login</button>
                                                                     </div> :
                                                                     <div className="text-center">
                                                                         <button type="submit" className='btn btn-dark  ml-6 mt-4'>signup</button>
